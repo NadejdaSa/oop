@@ -1,11 +1,11 @@
 import requests
 from pprint import pprint
 import json
-
+from tqdm import tqdm
 
 def rank_sizes(letter):
-            sizes = ['s', 'm', 'x', 'o', 'p', 'q', 'r', 'y', 'z', 'w']
-            return sizes.index(letter)
+    sizes = ['s', 'm', 'x', 'o', 'p', 'q', 'r', 'y', 'z', 'w']
+    return sizes.index(letter)
 
 
 class VK:
@@ -20,10 +20,11 @@ class VK:
         url = f'{self.base_address}photos.get'
         params = {'owner_id': self.id, 'album_id': 'profile', 'rev' : 1, 'extended': 1, 'count': count}
         response = requests.get(url, params={**self.params, **params})
+        
         photo_dict = {}
         photos = [] ##json файл
         
-        for photo in response.json()['response'] ['items']:
+        for photo in tqdm(response.json()['response'] ['items']):
             photo_info = {}
             size = max(photo['sizes'], key=lambda x: rank_sizes(x['type']))
             if photo['likes']['count'] not in photo_dict.keys():
@@ -32,7 +33,7 @@ class VK:
             else:
                 photo_dict[f"{photo['likes']['count']} + {photo['date']}"] = size['url']
                 photo_info['file_name'] = f"{photo['likes']['count']} + {photo['date']}.jpg"
-
+            pass
             photo_info['size'] = size['type']
             photos.append(photo_info)
 
@@ -63,16 +64,24 @@ class YD:
         requests.put(url=href, data=data, headers=self.headers)        
     
 
-##access_token = ''
-##user_id = ''
-##vk = VK(access_token, user_id)
-##token_yd = ''
+
+print('Введите id пользователя vk')
+user_id = input()
+
+access_token = ''
+vk = VK(access_token, user_id)
+token_yd = ''
 
 yd = YD(token_yd)
 yd.create_folder('photovk')
+
 photo_dict = vk.big_photos_get()
-for name, photo_url in photo_dict.items():
+    
+for name, photo_url in tqdm(photo_dict.items()):
     yd.upload(photo_url, name)
+    pass
+
+
 
 
 
