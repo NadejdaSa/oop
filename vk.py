@@ -9,16 +9,15 @@ def rank_sizes(letter):
 
 
 class VK:
-    def __init__(self, access_token, user_id, version='5.131'):
+    def __init__(self, access_token, version='5.131'):
         self.base_address = 'https://api.vk.com/method/'
         self.token = access_token
-        self.id = user_id
         self.version = version
         self.params = {'access_token': self.token, 'v': self.version}
     
-    def big_photos_get(self, count=5):
+    def big_photos_get(self, user_id, count=5):
         url = f'{self.base_address}photos.get'
-        params = {'owner_id': self.id, 'album_id': 'profile', 'rev' : 1, 'extended': 1, 'count': count}
+        params = {'owner_id': user_id, 'album_id': 'profile', 'rev' : 1, 'extended': 1, 'count': count}
         response = requests.get(url, params={**self.params, **params})
         
         photo_dict = {}
@@ -65,17 +64,14 @@ class YD:
     
 
 
-print('Введите id пользователя vk')
-user_id = input()
-
+pprint('Введите id пользователя vk')
 access_token = ''
-vk = VK(access_token, user_id)
+vk = VK(access_token, user_id=input())
 token_yd = ''
-
 yd = YD(token_yd)
 yd.create_folder('photovk')
 
-photo_dict = vk.big_photos_get()
+photo_dict = vk.big_photos_get(user_id=input())
     
 for name, photo_url in tqdm(photo_dict.items()):
     yd.upload(photo_url, name)
